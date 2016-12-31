@@ -1,6 +1,8 @@
 package name.vikke.syllabus;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,14 +11,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private class CourseItem {
         String date;
@@ -30,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         public ItemAdapter(Context context, int resource, List<CourseItem> objects) {
             super(context, resource, objects);
-            inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @NonNull
@@ -38,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             View view = inflater.inflate(R.layout.lecture_row, null, false);
 
-            TextView dateView = (TextView)view.findViewById(R.id.date);
-            TextView titleView = (TextView)view.findViewById(R.id.title);
+            TextView dateView = (TextView) view.findViewById(R.id.date);
+            TextView titleView = (TextView) view.findViewById(R.id.title);
 
             CourseItem item = getItem(position);
             dateView.setText(item.date);
@@ -75,16 +83,31 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_main);
+
         itemList = new ArrayList<CourseItem>();
         adapter = new ItemAdapter(getApplicationContext(), 0, itemList);
-        ListView listView = (ListView)findViewById(R.id.listview);
+        ListView listView = (ListView) findViewById(R.id.listview);
         listView.setAdapter(adapter);
+        setCourseData();
 
-        setContentView(R.layout.activity_main);
+        listView.setOnItemClickListener(this);
     }
 
-    /**
-     *
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        CourseItem item = (CourseItem)parent.getItemAtPosition(position);
+
+        Intent intent = new Intent(this, CourseDetail.class);
+        intent.putExtra("date", item.date);
+        intent.putExtra("title", item.title);
+        intent.putExtra("teacher", item.teacher);
+        intent.putExtra("detail", item.detail);
+
+        startActivity(intent);
+    }
+
+     /**
      * @param menu
      * @return
      */
@@ -94,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
      * @param item
      * @return
      */
